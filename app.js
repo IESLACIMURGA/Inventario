@@ -113,21 +113,58 @@ function renderSidebar() {
       ${cat.nombre}
       ${hasSubs ? `<span class="chevron">▶</span>` : ''}
     `;
-    item.addEventListener('click', () => {
-      state.activeCategory = cat.id;
-      state.activeSubcat = null;
-      state.page = 1;
-      showHome();
-      renderSidebar();
-      renderTable();
-      updatePageHeading();
-      closeSidebar();
+    
+    item.addEventListener('click', (e) => {
+      const isMobile = window.innerWidth <= 768;
+      const sidebarOpen = document.getElementById('sidebar').classList.contains('open');
+      
+      if (hasSubs && isMobile && sidebarOpen) {
+        if (state.activeCategory === cat.id) {
+          state.activeCategory = null;
+          state.activeSubcat = null;
+        } else {
+          state.activeCategory = cat.id;
+          state.activeSubcat = null;
+        }
+        state.page = 1;
+        renderSidebar();
+      } else {
+        state.activeCategory = cat.id;
+        state.activeSubcat = null;
+        state.page = 1;
+        showHome();
+        renderSidebar();
+        renderTable();
+        updatePageHeading();
+        closeSidebar();
+      }
     });
+    
     nav.appendChild(item);
 
     if (hasSubs) {
       const sub = document.createElement('div');
       sub.className = 'nav-sub' + (isOpen ? ' open' : '');
+      
+      // Subcategoría "Todos" para ver todos los materiales de la categoría
+      const todosItem = document.createElement('div');
+      todosItem.className = 'nav-sub-item' + (state.activeSubcat === null && state.activeCategory === cat.id ? ' active' : '');
+      todosItem.textContent = '— Todos —';
+      todosItem.style.fontWeight = '600';
+      todosItem.style.fontStyle = 'italic';
+      todosItem.addEventListener('click', e => {
+        e.stopPropagation();
+        state.activeCategory = cat.id;
+        state.activeSubcat = null;
+        state.page = 1;
+        showHome();
+        renderSidebar();
+        renderTable();
+        updatePageHeading();
+        closeSidebar();
+      });
+      sub.appendChild(todosItem);
+      
       cat.subcategorias.forEach(sc => {
         const si = document.createElement('div');
         si.className = 'nav-sub-item' + (state.activeSubcat === sc ? ' active' : '');
