@@ -102,6 +102,8 @@ function renderSidebar() {
   allItem.addEventListener('click', () => {
     state.activeCategory = null;
     state.activeSubcat = null;
+    state.search = '';
+    document.getElementById('searchInput').value = '';
     state.page = 1;
     showHome();
     renderSidebar();
@@ -140,6 +142,8 @@ function renderSidebar() {
       } else {
         state.activeCategory = cat.id;
         state.activeSubcat = null;
+        state.search = '';
+        document.getElementById('searchInput').value = '';
         state.page = 1;
         showHome();
         renderSidebar();
@@ -155,7 +159,7 @@ function renderSidebar() {
       const sub = document.createElement('div');
       sub.className = 'nav-sub' + (isOpen ? ' open' : '');
       
-      // Subcategoría "Todos" para ver todos los materiales de la categoría
+      // Subcategoría "Todos"
       const todosItem = document.createElement('div');
       todosItem.className = 'nav-sub-item' + (state.activeSubcat === null && state.activeCategory === cat.id ? ' active' : '');
       todosItem.textContent = '— Todos —';
@@ -165,6 +169,8 @@ function renderSidebar() {
         e.stopPropagation();
         state.activeCategory = cat.id;
         state.activeSubcat = null;
+        state.search = '';
+        document.getElementById('searchInput').value = '';
         state.page = 1;
         showHome();
         renderSidebar();
@@ -182,6 +188,8 @@ function renderSidebar() {
           e.stopPropagation();
           state.activeCategory = cat.id;
           state.activeSubcat = sc;
+          state.search = '';
+          document.getElementById('searchInput').value = '';
           state.page = 1;
           showHome();
           renderSidebar();
@@ -387,6 +395,12 @@ document.getElementById('searchInput').addEventListener('input', e => {
     state.page = 1;
     state.activeCategory = null;
     state.activeSubcat = null;
+    
+    // Si estamos en detalle, volver al listado
+    if (document.getElementById('detailPage').classList.contains('visible')) {
+      showHome(true); // true = viene de búsqueda
+    }
+    
     renderSidebar();
     updatePageHeading();
     renderTable();
@@ -460,11 +474,15 @@ showDetail = function(id) {
 
 // Modificar showHome para limpiar el hash
 const originalShowHome = showHome;
-showHome = function() {
-  if (location.hash.startsWith('#detalle-')) {
+showHome = function(fromSearch = false) {
+  if (location.hash.startsWith('#detalle-') && !fromSearch) {
     history.back();
   } else {
     originalShowHome();
+    // Limpiar hash si viene de búsqueda
+    if (fromSearch) {
+      history.replaceState(null, '', ' ');
+    }
   }
 };
 
