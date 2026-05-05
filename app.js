@@ -51,16 +51,25 @@ function highlight(text, q) {
 }
 
 // ── Filtrado / datos visibles ─────────────────────────────────
+// ── Helpers para búsqueda sin tildes ─────────────────────────
+function normalizeText(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+}
+
+// ── Filtrado / datos visibles ─────────────────────────────────
 function filteredData() {
   let data = [...MATERIALES];
   if (state.activeCategory) data = data.filter(m => m.categoria === state.activeCategory);
   if (state.activeSubcat)   data = data.filter(m => m.subcategoria === state.activeSubcat);
   if (state.search) {
-    const q = state.search.toLowerCase();
+    const q = normalizeText(state.search);
     data = data.filter(m =>
-      m.nombre.toLowerCase().includes(q) ||
-      (m.codigo && m.codigo.includes(q)) ||
-      (m.descripcion && m.descripcion.toLowerCase().includes(q))
+      normalizeText(m.nombre).includes(q) ||
+      (m.codigo && normalizeText(m.codigo).includes(q)) ||
+      (m.descripcion && normalizeText(m.descripcion).includes(q))
     );
   }
   if (state.sortKey) {
